@@ -1,0 +1,134 @@
+\section{ (20 pts)}
+\begin{enumerate} [(a)]
+	% Problem 1(a)
+	\item \label{1(a)} For an exponential random variable $X \sim \mathrm{Exp}(\lambda)$ with parameter $\lambda > 0$ and probability density function (\textsc{pdf})
+	\begin{equation*}
+		f_X(x) = \lambda e^{-\lambda x} \mathds{1}\!\left[x \geq 0\right],
+	\end{equation*}
+	Using the function \verb*|npr.read| to generate sample $u$ from a uniform distribution $u \sim U(0,1)$, it is possible to employ Inverse CDF method to sample $X$ from $u$. Defining $F_X(x)$ to be the CDF of $X$, we have that
+	\begin{equation*}
+		\begin{aligned}
+			F_X(x) &= \int_{-\infty}^x f_X(x')\mathrm{d}x' = \lambda \int_{0}^{x} e^{-\lambda x'} \mathrm{d}x' \\
+			 &= \left[-e^{-\lambda x'}\right]_0^x = 1 - e^{-\lambda x}.
+		\end{aligned}
+	\end{equation*}
+	From the above expressions, we have that the quantile of $X$ can be expressed as
+	\begin{equation*}
+		F_X^{-1}(u) = -\frac{\log(1-u)}{\lambda}.
+	\end{equation*}
+	Using the fact that $u \overset{d}{=} 1-u$, we have that
+	\begin{equation*}
+		u \sim U(0,1),\quad x := -\frac{\log u}{\lambda} \overset{d}{=} \mathrm{Exp}(\lambda)
+	\end{equation*}
+	The following snippet of code tries to sample $X$ using samples generated from $u$.
+	\begin{lstlisting}[language=Python]
+import numpy as np
+import numpy.random as npr
+
+# Draw n samples from an exponential distribution with parameter lamb.
+def rand_exp(lamb, n):
+	u = npr.rand(n)
+	# Using inverse CDF method
+	x = -np.log(u)/lamb
+	return x
+	\end{lstlisting}
+	% Problem 1(b)
+	\item \label{1(b)} Given an exponential random variable $X \sim \mathrm{Exp}(\lambda)$ with parameter $\lambda > 0$ and probability density function (\textsc{PDF})
+	\begin{equation*}
+		f_X(x) = \lambda e^{-\lambda x} \mathds{1}\!\left[x \geq 0\right],
+	\end{equation*}
+	We have that $E[X]$, which denotes the mean of $X$, expressed as
+	\begin{equation*}
+		\begin{aligned}
+			E[X] &= \int_{-\infty}^{\infty} x\lambda e^{-\lambda x} \mathds{1}\!\left[x \geq 0\right]\!\mathrm{d}x \\
+			&= \frac{1}{\lambda} \int_{0}^{\infty} y e^{-y} \mathrm{d}y && \text{(Perform substitution $y=\lambda x$)} \\
+			&= \frac{1}{\lambda} \left[-ye^{-y} - e^{-y}\right]_{0}^{\infty} \\
+			&= \frac{1}{\lambda}			
+		\end{aligned}
+	\end{equation*}
+	Similarly, $\mathrm{Var}[X]$, which represents the variance of $X$, can be expressed as
+	\begin{equation*}
+		\begin{aligned}
+			\mathrm{Var}[X] &= E\!\left[X^2\right] - \left(E[X]\right)^2 \\
+			&= \int_{-\infty}^{\infty} x^2 \lambda e^{-\lambda x} \mathds{1}\!\left[x \geq 0\right]\!\mathrm{d}x - \frac{1}{\lambda^2} \\
+			&= \frac{1}{\lambda^2} \int_{0}^{\infty} y^2 e^{-y} \mathrm{d}y - \frac{1}{\lambda^2} && \text{(Perform substitution $y=\lambda x$)} \\
+			&= \frac{1}{\lambda^2} \left(\left[e^{-y}\left(y^2+2y+2\right)\right]_{0}^{\infty} - 1\right) \\
+			&= \frac{1}{\lambda^2}
+		\end{aligned}
+	\end{equation*}
+	% Problem 1(c)
+	\item \label{1(c)} Using the result obtained in \ref{1(b)}, the following code shows the correctness for \verb|rand_exp| we implemented in \ref{1(a)}.
+	\begin{lstlisting} [language=Python]
+# compute the mean of an exponential distribution with parameter lamb.
+def exp_mean(lamb):
+	return 1/lamb
+
+# compute the variance of an exponential distribution with parameter lamb.
+def exp_var(lamb):
+	return 1/(lamb)**2
+
+lamb = 1.5
+n = 100000
+x = rand_exp(lamb, n)
+
+print(f'true mean {exp_mean(lamb)}, empirical mean {x.mean()}')
+print(f'true variance {exp_var(lamb)}, empirical variance {x.var()}')
+	\end{lstlisting}
+	Here are the results we obtained while executing the code.
+	\begin{verbatim}
+true mean 0.6666666666666666, empirical mean 0.6656982498031476
+true variance 0.4444444444444444, empirical variance 0.44331074868144876
+	\end{verbatim}
+	The negligible difference between true and empirical mean and variance here shows that the implementation at \ref{1(a)} works properly.
+	% Problem 1(d)
+	\item \label{1(d)} Now, considering a gamma random variable $Y_1 \sim \mathrm{Gamma}(a_1,b)$ with shape parameter $a_1 > 0$ and rate parameter $b > 0$ with \textsc{pdf}
+	\begin{equation*}
+		f_{Y_1}(y) = \frac{b^{a_1} y^{a_1 - 1} e^{-by}}{\Gamma(a_1)} \mathds{1}\!\left[y \geq 0\right]
+	\end{equation*}
+	Taking another gamma random variable $Y_2 \sim \mathrm{Gamma}(a_2,b)$ with shape parameter $a_2 > 0$ and rate parameter $b > 0$, assuming that $Y_1$ and $Y_2$ are independent, we have that for a random variable $Y = Y_1 + Y_2$, its \textsc{pdf} $f_Y(y)$ can be expressed as
+	\begin{equation*}
+		\begin{aligned}
+			f_Y(y) &= \int_{-\infty}^{\infty} f_{Y_1}(t) f_{Y_2}(y-t) \mathrm{d}t \\
+			&= \frac{b^{a_1+a_2}e^{-by}}{\Gamma(a_1)\Gamma(a_2)} \int_0^y t^{a_1-1} (y-t)^{a_2-1} \mathrm{d}t \\
+			&= \frac{b^{a_1+a_2}e^{-by}}{\Gamma(a_1)\Gamma(a_2)} y^{a_1+a_2-1} \int_0^1 z^{a_1-1} (1-z)^{a_2-1} \mathrm{d}z && \text{(Perform substitution $t = yz$)} \\
+			&= \frac{b^{a_1+a_2}y^{a_1+a_2-1}e^{-by}}{\Gamma(a_1)\Gamma(a_2)} \frac{\Gamma(a_1)\Gamma(a_2)}{\Gamma(a_1+a_2)} = \frac{b^{a_1+a_2}y^{a_1+a_2-1}e^{-by}}{\Gamma(a_1+a_2)}
+		\end{aligned}
+	\end{equation*}
+	Which corresponds to a gamma distribution $Y \sim \mathrm{Gamma}(a_1+a_2, b)$. \qed
+	% Problem 1(e)
+	\item \label{1(e)} In this section, we are going to prove that a gamma distributed random variable $Y \sim \mathrm{Gamma}(m, 1)$ with $m \in \mathbb{N}$ can be obtained from summation of $m$ exponential random variables $X \sim \mathrm{Exp}(1)$, which can be simply referred to as $X \sim \mathrm{Gamma}(1,1)$. \\
+	We learned from \ref{1(d)} that summation of two independent gamma random variables $Y_1 \sim \mathrm{Gamma}(a_1,b)$ and $Y_2 \sim \mathrm{Gamma}(a_2,b)$ results in a gamma random variable $Y = Y_1 + Y_2$ where $Y \sim \mathrm{Gamma}(a_1 + a_2, b)$.
+	Since $\mathrm{Exp}(1)$ corresponds to the same distribution as $\mathrm{Gamma}(1,1)$, by fixing $a_1=a_2=1$, it will result in a random variable $Y$ with $Y \sim \mathrm{Gamma}(2,1)$. Summing up $Y$ with $X$ for once more (by making $Y$ and $X$ independent towards each other) will result in another gamma distribution $Y'$ with $Y' \sim \mathrm{Gamma}(3,1)$. \\
+	Using this logic, if we sum up $m$ samples generated from $m$ independent exponential random variables that follow the exponential distribution $\mathrm{Exp}(1)$ or $X \sim \mathrm{Gamma}(1,1)$, it will ultimately result in a sample that follows the gamma distribution $Y \sim \mathrm{Gamma}(m,1)$.
+	% Problem 1(f)
+	\item \label{1(f)} Using the procedure explained in \ref{1(e)}, the following code tries to draw samples from $Y \sim \mathrm{Gamma}(m,1)$ and verify its correctness.
+	\begin{lstlisting} [language=Python]
+# Draw n samples from a gamma random variable with shape m (natural number) 
+# and rate 1.
+def rand_gamma(m, n):
+	f_y = 0
+	# Using the facts derived at (e)
+	for i in range(m):
+		f_y += rand_exp(1, n)
+	return f_y
+
+def gamma_mean(m):
+	return m
+
+def gamma_var(m):
+	return m
+
+n = 100000
+m = 6
+x = rand_gamma(m, n)
+
+print(f'true mean {gamma_mean(m)}, empirical mean {x.mean()}')
+print(f'true variance {gamma_var(m)}, empirical variance {x.var()}')
+	\end{lstlisting}
+	Here are the results we obtained while executing the code.
+	\begin{verbatim}
+true mean 6, empirical mean 6.000319884866008
+true variance 6, empirical variance 5.945326011390203
+	\end{verbatim}
+	The negligible difference between true and empirical mean and variance here shows that the idea proposed at \ref{1(e)} works properly.
+\end{enumerate}

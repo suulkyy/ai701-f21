@@ -1,0 +1,37 @@
+\section{ (20 pts)}
+For a $d$-dimensional categorical random variable $X$ with Probability Mass Function (\textsc{pmf})
+\begin{equation*}
+	f_X(x) = \prod_{j=1}^d \pi_j^{\mathds{1}\left[x=j\right]}
+\end{equation*}
+The following code tries to draw samples from said distribution via \verb|npr.rand| and check the correctness for our implementation
+\begin{lstlisting}[language=Python]
+# draw a sample from a categorical distribution with parameter pi
+def rand_cat(pi):
+	# Compute cumulative probability theta_hat
+	theta_hat = np.array([pi[:i].sum() for i in range(1,pi.size+1)])
+	# Draw u ~ Unif(0,1)
+	u = npr.rand(1)
+	x = 0
+	while u > theta_hat[x]:
+		x += 1
+	return x
+
+# verify the code using LLN
+d = 5
+pi = npr.rand(d)
+pi = pi / pi.sum()
+
+n = 100000
+x = np.zeros(d)
+for i in range(n):
+	x[rand_cat(pi)] += 1
+
+print(f'empirical mean {x/x.sum()}')
+print(f'true mean {pi}')
+\end{lstlisting}
+Here are the results we obtained while executing the code.
+\begin{verbatim}
+empirical mean [0.16086 0.00435 0.10372 0.3713  0.35977]
+true mean [0.16184142 0.00432721 0.10369096 0.37076513 0.35937528]
+\end{verbatim}
+The negligible difference between empirical mean and true mean shows the correctness of our algorithm with respect to the true value.
