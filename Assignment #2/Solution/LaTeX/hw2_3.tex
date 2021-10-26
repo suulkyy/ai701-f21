@@ -1,7 +1,7 @@
 \section{ (20 pts)}
 For a $d$-dimensional categorical random variable $X$ with Probability Mass Function (\textsc{pmf})
 \begin{equation*}
-	f_X(x) = \prod_{j=1}^d \pi_j^{\mathds{1}\left[x=j\right]}
+	f_X(x) = \prod_{j=0}^{d-1} \pi_j^{\mathds{1}\left[x=j\right]}
 \end{equation*}
 The following code tries to draw samples from said distribution via \verb|npr.rand| and check the correctness for our implementation
 \begin{lstlisting}[language=Python]
